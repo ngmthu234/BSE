@@ -8,3 +8,6 @@ beef_2022_bycounty <- beef_2022 %>% group_by(State, County) %>% summarize("Inven
 library(tigris)
 library(sf)
 library(rmapshaper)
+
+us_counties <- counties(cb = TRUE, resolution = "5m")
+us_states <- states(cb = TRUE, resolution = "500k")
