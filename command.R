@@ -16,3 +16,7 @@ beef_2022_bycounty <- beef_2022_bycounty %>% dplyr::filter(State != "ALASKA") %>
 us_counties <- us_counties %>% dplyr:filter(STUSPS != "AK") %>% dplyr:filter(STUSPS != "AS") %>% dplyr:filter(STUSPS != "DC") %>% dplyr:filter(STUSPS != "GU") %>% dplyr:filter(STUSPS != "HI") %>% dplyr:filter(STUSPS != "MP") %>% dplyr:filter(STUSPS != "PR") %>% dplyr:filter(STUSPS != "VI")
 us_states <- us_states %>% dplyr:filter(STUSPS != "AK") %>% dplyr:filter(STUSPS != "AS") %>% dplyr:filter(STUSPS != "DC") %>% dplyr:filter(STUSPS != "GU") %>% dplyr:filter(STUSPS != "HI") %>% dplyr:filter(STUSPS != "MP") %>% dplyr:filter(STUSPS != "PR") %>% dplyr:filter(STUSPS != "VI")
 
+beef_2022_bycounty$County <- tolower(beef_2022_bycounty$County)
+beef_2022_bycounty$State <- tolower(beef_2022_bycounty$State)
+us_counties$NAME <-tolower(us_counties$NAME)
+us_counties$STATE_NAME <-tolower(us_counties$STATE_NAME)
