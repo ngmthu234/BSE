@@ -20,3 +20,5 @@ beef_2022_bycounty$County <- tolower(beef_2022_bycounty$County)
 beef_2022_bycounty$State <- tolower(beef_2022_bycounty$State)
 us_counties$NAME <-tolower(us_counties$NAME)
 us_counties$STATE_NAME <-tolower(us_counties$STATE_NAME)
+
+beef_2022_map <- merge(us_counties, beef_2022_bycounty, by.x = c("STATE_NAME", "NAME"), by.y = c("State", "County"), all.x = TRUE) %>% st_as_sf()
