@@ -33,3 +33,4 @@ BSE_state_name <- c("Texas", "Alabama", "California", "Florida", "South Carolina
 
 BSE_state <- us_states %>% dplyr::filter(NAME %in% BSE_state_name) %>% mutate(bse_status = "State with positive BSE case(s)")
 
+BSE_state_centroid <- st_centroid(BSE_state)
