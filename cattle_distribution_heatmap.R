@@ -25,7 +25,7 @@ us_counties$STATE_NAME <-tolower(us_counties$STATE_NAME)
 beef_2022_map <- merge(us_counties, beef_2022_bycounty, by.x = c("STATE_NAME", "NAME"), by.y = c("State", "County"), all.x = TRUE) %>% st_as_sf()
 
 # To plot heatmap of beef distribution across the U.S. 
-ggplot() + geom_sf(data = beef_2022_map, aes(fill = `Inventory (Animal heads)`), color = "gray30", size = 1) + geom_sf(data = us_states, fill = NA, color = "black", size = 500) + coord_sf(crs = st_crs ("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96")) + scale_fill_gradient(low = "lightblue", high = "darkblue", na.value = "gray90") + labs(title = "Beef cattle population by U.S. county", fill = "Inventory (Animal heads)") + theme_void()
+ggplot() + geom_sf(data = beef_2022_map, aes(fill = `Inventory (Animal heads)`), color = "gray30", size = 0.1) + geom_sf(data = us_states, fill = NA, color = "black", size = 5) + coord_sf(crs = st_crs ("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96")) + scale_fill_gradient(low = "lightblue", high = "darkblue", na.value = "gray90") + labs(title = "Beef cattle population by U.S. county", fill = "Inventory (Animal heads)") + theme_void()
 
 BSE_state_name <- c("Texas", "Alabama", "California", "Florida", "South Carolina")
 
