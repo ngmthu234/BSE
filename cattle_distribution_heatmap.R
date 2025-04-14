@@ -30,3 +30,6 @@ ggplot() + geom_sf(data = beef_2022_map, aes(fill = `Inventory (Animal heads)`),
 # To add pin pointing at states with positive BSE cases
 
 BSE_state_name <- c("Texas", "Alabama", "California", "Florida", "South Carolina")
+
+BSE_state <- us_states %>% dplyr::filter(NAME %in% BSE_state_name) %>% mutate(bse_status = "State with positive BSE case(s)")
+
