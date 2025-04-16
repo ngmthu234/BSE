@@ -1,40 +1,54 @@
+# Load csv file into R
 beef_2022 <- read.csv("~/Documents/BSE project/cow_inventory_beef_2022.csv")
 # Change "~/Documents/BSE project/cow_inventory_beef_2022.csv" with your actual path
 
-library(tidyverse)
-beef_2022 <- beef_2022 %>% dplyr::filter(Value != " (D)") %>% mutate(Value = gsub(",", "", Value)) %>% mutate(Value = as.numeric(Value))
+# Load necessary libraries
+library(tidyverse)     # to manipulate data
+library(tigris)     # to donwload spatial data
+library(sf)     # to manipulate spatial data
+library(rmapshaper)     # (optional) to simplify spatial data
 
-beef_2022_bycounty <- beef_2022 %>% group_by(State, County) %>% summarize("Inventory (Animal heads)" = sum(Value))
+# Data cleanup #1
+beef_2022 <- beef_2022 %>% 
+     dplyr::filter(Value != " (D)") %>%     # to remove rows with " (D)" in column Value
+     mutate(Value = gsub(",", "", Value)) %>%     # to globally substitute "," to empty strings in column Value, preparing for numerical conversion
+     mutate(Value = as.numeric(Value))     # to convert strings in column Value into numbers, allowing arithmetic calculations 
 
-library(tigris)
-library(sf)
-library(rmapshaper)
+# Combine data 
+beef_2022_bycounty <- beef_2022 %>% 
+     group_by(State, County) %>% 
+     summarize("Inventory (Animal heads)" = sum(Value))
 
-us_counties <- counties(cb = TRUE, resolution = "20m")
+# Download US county and state shapefiles
+us_counties <- counties(cb = TRUE, resolution = "20m", year = 2024)
 us_states <- states(cb = TRUE, resolution = "5m")
 
+# Data cleanup #2: Remove Alaska, Hawaii, District of Columbia, and U.S. territories
 beef_2022_bycounty <- beef_2022_bycounty %>% dplyr::filter(State != "ALASKA") %>% dplyr::filter(State != "HAWAII")
-us_counties <- us_counties %>% dplyr::filter(STUSPS != "AK") %>% dplyr::filter(STUSPS != "AS") %>% dplyr::filter(STUSPS != "DC") %>% dplyr::filter(STUSPS != "GU") %>% dplyr::filter(STUSPS != "HI") %>% dplyr::filter(STUSPS != "MP") %>% dplyr::filter(STUSPS != "PR") %>% dplyr::filter(STUSPS != "VI")
+us_counties <- us_counties %>% dplyr::filter(STUSPS != "AK") %>% dplyr::filter(STUSPS != "DC") %>% dplyr::filter(STUSPS != "HI")
 us_states <- us_states %>% dplyr::filter(STUSPS != "AK") %>% dplyr::filter(STUSPS != "AS") %>% dplyr::filter(STUSPS != "DC") %>% dplyr::filter(STUSPS != "GU") %>% dplyr::filter(STUSPS != "HI") %>% dplyr::filter(STUSPS != "MP") %>% dplyr::filter(STUSPS != "PR") %>% dplyr::filter(STUSPS != "VI")
 
+# Prepare data for merge()
 beef_2022_bycounty$County <- tolower(beef_2022_bycounty$County)
 beef_2022_bycounty$State <- tolower(beef_2022_bycounty$State)
 us_counties$NAME <-tolower(us_counties$NAME)
 us_counties$STATE_NAME <-tolower(us_counties$STATE_NAME)
 
-beef_2022_map <- merge(us_counties, beef_2022_bycounty, by.x = c("STATE_NAME", "NAME"), by.y = c("State", "County"), all.x = TRUE) %>% st_as_sf()
+# Merge dataframes
+beef_2022_map <- merge(us_counties, beef_2022_bycounty, by.x = c("STATE_NAME", "NAME"), by.y = c("State", "County"), all.x = TRUE) %>% 
+     st_as_sf()     # to convert output from merge() into a spatial data frame
 
-# To plot heatmap of beef distribution across the U.S. 
-ggplot() + geom_sf(data = beef_2022_map, aes(fill = `Inventory (Animal heads)`), color = "gray30", size = 0.1) + geom_sf(data = us_states, fill = NA, color = "black", size = 5) + coord_sf(crs = st_crs ("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96")) + scale_fill_gradient(low = "lightblue", high = "darkblue", na.value = "gray90") + labs(title = "Beef cattle population by U.S. county", fill = "Inventory (Animal heads)") + theme_void()
+# Plot heatmap of beef distribution across the U.S. only 
+ggplot() + geom_sf(data = beef_2022_map, aes(fill = `Inventory (Animal heads)`), color = "gray30", size = 0.1) + geom_sf(data = us_states, fill = NA, color = "black", size = 5) + coord_sf(crs = st_crs ("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96")) + scale_fill_gradient(low = "lightblue", high = "darkblue", na.value = "gray90") + labs(title = "Beef cattle population by U.S. counties", fill = "Inventory (Animal heads)") + theme_void()
 
-BSE_state_name <- c("Texas", "Alabama", "California", "Florida", "South Carolina")
+# Create dataframe of states with positive BSE cases
+BSE_state_name <- c("Texas", "Alabama", "California", "Florida", "South Carolina")     # to create a vector with names of states with positive BSE cases
+BSE_state <- us_states %>% dplyr::filter(NAME %in% BSE_state_name) %>%     # to filter rows under NAME of us_state, keeping only rows with values matching BSE_state_name
+     mutate(bse_status = "State with positive BSE case(s)")     # to create a new column bse_status with each row value set to be "State with positive BSE case(s)"
 
-BSE_state <- us_states %>% dplyr::filter(NAME %in% BSE_state_name) %>% mutate(bse_status = "State with positive BSE case(s)")
+# Plot heatmap of beef distribution across the U.S. with pins pointing at states with positive BSE cases
+BSE_state_centroid <- st_centroid(BSE_state)     # to calculate the centroid of target state to place the pin
+ggplot() + geom_sf(data = beef_2022_map, aes(fill = `Inventory (Animal heads)`), color = "gray30", size = 0.1) + geom_sf(data = us_states, fill = NA, color = "black", size = 5) + geom_sf(data = BSE_state_centroid, aes(color = bse_status, shape = bse_status), size = 5) + scale_color_manual(name = NULL, values = c("State with positive BSE case(s)" = "red")) + scale_shape_manual(name = NULL, values = c("State with positive BSE case(s)" = 17)) + coord_sf(crs = st_crs ("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96")) + scale_fill_gradient(low = "lightblue", high = "darkblue", na.value = "gray90") + labs(title = "Beef cattle population by U.S. counties", fill = "Inventory (Animal heads)") + theme_void()
 
-BSE_state_centroid <- st_centroid(BSE_state)
-
-# To add pin pointing at states with positive BSE cases
-ggplot() + geom_sf(data = beef_2022_map, aes(fill = `Inventory (Animal heads)`), color = "gray30", size = 0.1) + geom_sf(data = us_states, fill = NA, color = "black", size = 5) + geom_sf(data = BSE_state_centroid, aes(color = bse_status, shape = bse_status), size = 5) + scale_color_manual(name = NULL, values = c("State with positive BSE case(s)" = "red")) + scale_shape_manual(name = NULL, values = c("State with positive BSE case(s)" = 17)) + coord_sf(crs = st_crs ("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96")) + scale_fill_gradient(low = "lightblue", high = "darkblue", na.value = "gray90") + labs(title = "Beef cattle population by U.S. county", fill = "Inventory (Animal heads)") + theme_void()
-
-# To highlight outlines of states with positive BSE cases
-ggplot() + geom_sf(data = beef_2022_map, aes(fill = `Inventory (Animal heads)`), color = "gray30", size = 0.1) + geom_sf(data = us_states, fill = NA, color = "black", size = 5) + geom_sf(data = BSE_state, aes(color = bse_status), fill = NA, linewidth = 1.5) + scale_color_manual(name = NULL, values = c("State with positive BSE case(s)" = "red")) + coord_sf(crs = st_crs ("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96")) + scale_fill_gradient(low = "lightblue", high = "darkblue", na.value = "gray90") + labs(title = "Beef cattle population by U.S. county", fill = "Inventory (Animal heads)") + theme_void()
+# Plot heatmap of beef distribution across the U.S. with outlines of states with positive BSE cases highlighted 
+ggplot() + geom_sf(data = beef_2022_map, aes(fill = `Inventory (Animal heads)`), color = "gray30", size = 0.1) + geom_sf(data = us_states, fill = NA, color = "black", size = 5) + geom_sf(data = BSE_state, aes(color = bse_status), fill = NA, linewidth = 1.5) + scale_color_manual(name = NULL, values = c("State with positive BSE case(s)" = "red")) + coord_sf(crs = st_crs ("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96")) + scale_fill_gradient(low = "lightblue", high = "darkblue", na.value = "gray90") + labs(title = "Beef cattle population by U.S. counties", fill = "Inventory (Animal heads)") + theme_void()
