@@ -4,7 +4,7 @@ beef_2022 <- read.csv("~/Documents/BSE project/cow_inventory_beef_2022.csv")
 
 # Load necessary libraries
 library(tidyverse)     # to manipulate data
-library(tigris)     # to donwload spatial data
+library(tigris)     # to download spatial data
 library(sf)     # to manipulate spatial data
 library(rmapshaper)     # (optional) to simplify spatial data
 
