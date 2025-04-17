@@ -14,16 +14,16 @@ beef_2022 <- beef_2022 %>%
      mutate(Value = gsub(",", "", Value)) %>%     # to globally substitute "," to empty strings in column Value, preparing for numerical conversion
      mutate(Value = as.numeric(Value))     # to convert strings in column Value into numbers, allowing arithmetic calculations 
 
-# Combine data 
+# Data cleanup #2 
 beef_2022_bycounty <- beef_2022 %>% 
-     group_by(State, County) %>% 
-     summarize("Inventory (Animal heads)" = sum(Value))
+     group_by(State, County) %>%
+     summarize("Inventory (Animal heads)" = sum(Value))     # to create new column "Inventory (Animal heads)" summarizing total befef for each county
 
 # Download US county and state shapefiles
 us_counties <- counties(cb = TRUE, resolution = "20m", year = 2024)
 us_states <- states(cb = TRUE, resolution = "5m")
 
-# Data cleanup #2: Remove Alaska, Hawaii, District of Columbia, and U.S. territories
+# Data cleanup #3: Remove Alaska, Hawaii, District of Columbia, and U.S. territories
 beef_2022_bycounty <- beef_2022_bycounty %>% dplyr::filter(State != "ALASKA") %>% dplyr::filter(State != "HAWAII")
 us_counties <- us_counties %>% dplyr::filter(STUSPS != "AK") %>% dplyr::filter(STUSPS != "DC") %>% dplyr::filter(STUSPS != "HI")
 us_states <- us_states %>% dplyr::filter(STUSPS != "AK") %>% dplyr::filter(STUSPS != "AS") %>% dplyr::filter(STUSPS != "DC") %>% dplyr::filter(STUSPS != "GU") %>% dplyr::filter(STUSPS != "HI") %>% dplyr::filter(STUSPS != "MP") %>% dplyr::filter(STUSPS != "PR") %>% dplyr::filter(STUSPS != "VI")
