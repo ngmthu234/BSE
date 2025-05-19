@@ -9,7 +9,6 @@ BSE_case <- read_excel(file_path, sheet = "raw")
 
 # Data cleanup #1
 BSE_case <- BSE_case %>%
-     rename(Country = ...1) %>%     # to rename column 1 to "Country"
      dplyr::filter(Country != "EU total")     # to remove row EU total
      dplyr::mutate(`2003` = round(`2003), `2004` = round(`2004`), `2005` = round(`2005`), `2006` = round(`2006`), `2007` = round(`2007`), `2008` = round(`2008`), `2009` = round(`2009`), `2010` = round(`2010`)     # to round numbers in columns 2003 to 2010 to the nearest integer 
 
