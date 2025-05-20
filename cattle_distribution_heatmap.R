@@ -1,6 +1,7 @@
 # Load csv file into R
-beef_2022 <- read.csv("~/Documents/BSE project/cow_inventory_beef_2022.csv")
+file_path <- "C:/Users/tmn0031/OneDrive - Auburn University/Bovine spongiform encephalopathy/cow_inventory_beef_2022.csv"
 # Change "~/Documents/BSE project/cow_inventory_beef_2022.csv" with your actual path
+beef_2022 <- read.csv(file_path)
 
 # Load necessary libraries
 library(tidyverse)     # to manipulate data
@@ -9,6 +10,7 @@ library(sf)     # to manipulate spatial data
 library(rmapshaper)     # (optional) to simplify spatial data
 
 # Data cleanup #1
+beef_2022 <- subset(beef_2022 = -c(Program, Year, Period, Week.Ending, Geo.Level, State.ANSI, Ag.District, Ag.District.Code, County.ANSI, Zip.Code, Region, watershed_code, Watershed, Commodity, Data.Item, Domain, Domain.Category, CV)     # to remove unnecessary columns
 beef_2022 <- beef_2022 %>% 
      dplyr::filter(Value != " (D)") %>%     # to remove rows with " (D)" in column Value
      mutate(Value = gsub(",", "", Value)) %>%     # to globally substitute "," to empty strings in column Value, preparing for numerical conversion
