@@ -10,7 +10,7 @@ library(sf)     # to manipulate spatial data
 library(rmapshaper)     # (optional) to simplify spatial data
 
 # Data cleanup #1
-beef_2022 <- subset(beef_2022 = -c(Program, Year, Period, Week.Ending, Geo.Level, State.ANSI, Ag.District, Ag.District.Code, County.ANSI, Zip.Code, Region, watershed_code, Watershed, Commodity, Data.Item, Domain, Domain.Category, CV)     # to remove unnecessary columns
+beef_2022 <- beef_2022 %>% subset(beef_2022 = -c(Program, Year, Period, Week.Ending, Geo.Level, State.ANSI, Ag.District, Ag.District.Code, County.ANSI, Zip.Code, Region, watershed_code, Watershed, Commodity, Data.Item, Domain, Domain.Category, CV)     # to remove unnecessary columns
 beef_2022 <- beef_2022 %>% 
      dplyr::filter(Value != " (D)") %>%     # to remove rows with " (D)" in column Value
      mutate(Value = gsub(",", "", Value)) %>%     # to globally substitute "," to empty strings in column Value, preparing for numerical conversion
