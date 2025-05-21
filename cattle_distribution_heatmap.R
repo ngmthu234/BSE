@@ -13,7 +13,7 @@ library(scales)     # to control appearance of legend labels
 # Data cleanup #1
 beef <- subset(raw, select = -c(Program, Year, Period, Week.Ending, Geo.Level, State.ANSI, Ag.District, Ag.District.Code, County.ANSI, Zip.Code, Region, watershed_code, Watershed, Commodity, Data.Item, Domain, Domain.Category, CV....))     # to remove unnecessary columns
 beef <- beef %>% 
-     dplyr::filter(Value != "(D)") %>%     # to remove rows with "(D)" in column Value
+     dplyr::filter(Value != " (D)") %>%     # to remove rows with "(D)" in column Value
      mutate(Value = gsub(",", "", Value)) %>%     # to globally substitute "," to empty strings in column Value, preparing for numerical conversion
      mutate(Value = as.numeric(Value))     # to convert strings in column Value into numbers, allowing arithmetic calculations 
 
