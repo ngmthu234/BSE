@@ -1,7 +1,7 @@
 # Load csv file into R
 file_path <- "C:/Users/tmn0031/OneDrive - Auburn University/Bovine spongiform encephalopathy/cow_inventory_beef_2022.csv"
 # Change "~/Documents/BSE project/cow_inventory_beef_2022.csv" with your actual path
-beef_2022 <- read.csv(file_path)
+raw <- read.csv(file_path)
 
 # Load necessary libraries
 library(tidyverse)     # to manipulate data
@@ -11,34 +11,29 @@ library(rmapshaper)     # (optional) to simplify spatial data
 library(scales)     # to control appearance of legend labels
 
 # Data cleanup #1
-beef_2022 <- subset(beef_2022, select = -c(Program, Year, Period, Week.Ending, Geo.Level, State.ANSI, Ag.District, Ag.District.Code, County.ANSI, Zip.Code, Region, watershed_code, Watershed, Commodity, Data.Item, Domain, Domain.Category, CV....))     # to remove unnecessary columns
-beef_2022 <- beef_2022 %>% 
-     dplyr::filter(Value != " (D)") %>%     # to remove rows with " (D)" in column Value
+beef <- subset(raw, select = -c(Program, Year, Period, Week.Ending, Geo.Level, State.ANSI, Ag.District, Ag.District.Code, County.ANSI, Zip.Code, Region, watershed_code, Watershed, Commodity, Data.Item, Domain, Domain.Category, CV....))     # to remove unnecessary columns
+beef <- beef %>% 
+     dplyr::filter(Value != "(D)") %>%     # to remove rows with "(D)" in column Value
      mutate(Value = gsub(",", "", Value)) %>%     # to globally substitute "," to empty strings in column Value, preparing for numerical conversion
      mutate(Value = as.numeric(Value))     # to convert strings in column Value into numbers, allowing arithmetic calculations 
 
-# Data cleanup #2 
-beef_2022_bycounty <- beef_2022 %>% 
-     group_by(State, County) %>%
-     summarize("Inventory (Animal heads)" = sum(Value))     # to create new column "Inventory (Animal heads)" summarizing total befef for each county
-
 # Download US county and state shapefiles
-us_counties <- counties(cb = TRUE, resolution = "20m", year = 2024)
-us_states <- states(cb = TRUE, resolution = "20m")
+counties_sf <- counties(cb = TRUE, resolution = "20m", year = 2022)
+states_sf <- states(cb = TRUE, resolution = "20m", year = 2022)
 
-# Data cleanup #3: Remove Alaska, District of Columbia, Hawaii, and U.S. territories
-beef_2022_bycounty <- beef_2022_bycounty %>% dplyr::filter(State != "ALASKA") %>% dplyr::filter(State != "HAWAII")
-us_counties <- us_counties %>% dplyr::filter(STUSPS != "AK") %>% dplyr::filter(STUSPS != "DC") %>% dplyr::filter(STUSPS != "HI")
-us_states <- us_states %>% dplyr::filter(STUSPS != "AK") %>% dplyr::filter(STUSPS != "AS") %>% dplyr::filter(STUSPS != "DC") %>% dplyr::filter(STUSPS != "GU") %>% dplyr::filter(STUSPS != "HI") %>% dplyr::filter(STUSPS != "MP") %>% dplyr::filter(STUSPS != "PR") %>% dplyr::filter(STUSPS != "VI")
+# Data cleanup #2: Remove Alaska, District of Columbia, Hawaii, and U.S. territories
+beef <- beef %>% dplyr::filter(State != "ALASKA") %>% dplyr::filter(State != "HAWAII")
+counties_sf <- counties_sf %>% dplyr::filter(STUSPS != "AK") %>% dplyr::filter(STUSPS != "DC") %>% dplyr::filter(STUSPS != "HI")
+states_sf <- states_sf %>% dplyr::filter(STUSPS != "AK") %>% dplyr::filter(STUSPS != "AS") %>% dplyr::filter(STUSPS != "DC") %>% dplyr::filter(STUSPS != "GU") %>% dplyr::filter(STUSPS != "HI") %>% dplyr::filter(STUSPS != "MP") %>% dplyr::filter(STUSPS != "PR") %>% dplyr::filter(STUSPS != "VI")
 
 # Prepare data for merge()
-beef_2022_bycounty$County <- tolower(beef_2022_bycounty$County)
-beef_2022_bycounty$State <- tolower(beef_2022_bycounty$State)
-us_counties$NAME <-tolower(us_counties$NAME)
-us_counties$STATE_NAME <-tolower(us_counties$STATE_NAME)
+beef$County <- tolower(beef$County)
+beef$State <- tolower(beef$State)
+counties_sf$NAME <-tolower(counties_sf$NAME)
+counties_sf$STATE_NAME <-tolower(counties_sf$STATE_NAME)
 
 # Merge dataframes
-beef_2022_map <- merge(us_counties, beef_2022_bycounty, by.x = c("STATE_NAME", "NAME"), by.y = c("State", "County"), all.x = TRUE) %>% 
+beef_map <- merge(counties_sf, beef, by.x = c("STATE_NAME", "NAME"), by.y = c("State", "County"), all.x = TRUE) %>% 
      st_as_sf()     # to convert output from merge() into a spatial data frame
 
 # Obtain centroids of U.S. states for state labeling
@@ -47,8 +42,8 @@ state_centroid <- usmapdata::centroid_labels("states")     # to obtain centroids
 state_centroid <- state_centroid %>% dplyr::filter(full != "Alaska") %>% dplyr::filter(full != "District of Columbia") %>% dplyr::filter(full != "Hawaii")     # to remove Alaska, District of Columbia, and Hawaii
 
 # Plot heatmap of beef distribution across the U.S. only 
-ggplot() + geom_sf(data = beef_2022_map, aes(fill = `Inventory (Animal heads)`), color = "gray30", size = 5) 
-     + geom_sf(data = us_states, fill = NA, color = "black", size = 5) 
+ggplot() + geom_sf(data = beef_map, aes(fill = `Value`), color = "gray30", size = 5) 
+     + geom_sf(data = states_sf, fill = NA, color = "black", size = 5) 
      + geom_sf_text (data = state_centroid, aes(label = abbr), color = "white", size = 3.5, fontface = "bold") 
      + coord_sf(crs = st_crs ("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96")) 
      + scale_fill_gradient(low = "lightblue", high = "darkblue", na.value = "gray90", label = comma) 
@@ -61,11 +56,10 @@ BSE_state <- state_centroid %>% dplyr::filter(NAME %in% BSE_state_name) %>%     
      mutate(bse_status = "State with positive BSE case(s)")     # to create a new column bse_status with each row value set to be "State with positive BSE case(s)"
 
 # Plot heatmap of beef distribution across the U.S. with outlines of states with positive BSE cases highlighted. No counties 
-beef_2022_bystate <- beef_2022 %>% group_by(State) %>% summarize("Inventory (Animal heads)" = sum(Value)) %>% dplyr::filter(State != "ALASKA") %>% dplyr::filter(State != "HAWAII")
-beef_2022_bystate$State <- tolower(beef_2022_bystate$State)
-beef_2022_map2 <- merge(us_states, beef_2022_bystate, by.x = "NAME", by.y = "State", all.x = TRUE) %>% st_as_sf()
+beef_state <- beef %>% group_by(State) %>% summarize("Value" = sum(Value)) %>% dplyr::filter(State != "ALASKA") %>% dplyr::filter(State != "HAWAII")
+beef_map_state <- merge(states_sf, beef_state, by.x = "NAME", by.y = "State", all.x = TRUE) %>% st_as_sf()
 ggplot() + 
-     geom_sf(data = beef_2022_map2, aes(fill = `Inventory (Animal heads)`), color = "black", size = 5) + 
+     geom_sf(data = beef_map_state, aes(fill = `Value`), color = "black", size = 5) + 
      geom_sf(data = BSE_state, aes(color = bse_status), fill = NA, linewidth = 1.5) + 
      scale_color_manual(name = NULL, values = c("State with positive BSE case(s)" = "red")) + 
      geom_sf_text (data = state_centroid, aes(label = abbr), color = "white", size = 3.5, fontface = "bold") + 
