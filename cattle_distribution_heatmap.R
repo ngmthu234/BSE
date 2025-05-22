@@ -46,7 +46,7 @@ ggplot()
      + geom_sf(data = beef_map, aes(fill = `Value`), color = "gray30", size = 1)     # to add layer beef_map for my heatmap layer
      + scale_fill_gradient(low = "lightblue", high = "sandybrown", na.value = "gray90", label = comma)     # to fill gradient the heatmap layer based on value in column Value 
      + geom_sf(data = states_sf, fill = NA, color = "black", linewidth = 0.8)     # to add layer states_sf for the state lines
-     + geom_sf_text (data = state_centroid, aes(label = abbr), color = "black", size = 5, fontface = "bold")     # to add layer state_centroid for state labels
+     + geom_sf_text (data = state_centroid, aes(label = abbr), color = "black", size = 10, fontface = "bold")     # to add layer state_centroid for state labels
      + coord_sf(crs = st_crs ("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96"))     # to specify all layers CRS     
      + labs(title = "Beef cattle population by U.S. counties", fill = "Inventory (Animal heads)")     # to add plot labels
      + theme_void()     # to remove all background elements
@@ -66,7 +66,7 @@ ggplot() +
      + scale_fill_gradient(low = "lightblue", high = "sandybrown", na.value = "gray90", label = comma)
      + geom_sf(data = bse_state, aes(color = bse_status), fill = NA, linewidth = 0.5)     # to add layer bse_state for BSE states
      + scale_color_manual(name = NULL, values = c("State with positive BSE case(s)" = "red"))     # to set the BSE state outlines in red
-     + geom_sf_text (data = state_centroid, aes(label = abbr), color = "black", size = 5, fontface = "bold") 
+     + geom_sf_text (data = state_centroid, aes(label = abbr), color = "black", size = 10, fontface = "bold") 
      + coord_sf(crs = st_crs ("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96")) 
      + labs(title = "Beef cattle population by U.S. states", fill = "Inventory (Animal heads)")    
      + theme_void()
