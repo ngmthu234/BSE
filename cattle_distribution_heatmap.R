@@ -55,6 +55,18 @@ ggplot()
 beef_state <- beef %>% group_by(State) %>% summarize("Value" = sum(Value)) %>% dplyr::filter(State != "ALASKA") %>% dplyr::filter(State != "HAWAII")
 beef_map_state <- merge(states_sf, beef_state, by.x = "NAME", by.y = "State", all.x = TRUE) %>% st_as_sf()
 
+# Plot heatmap of beef distribution across the U.S. -- with breakpoints and without counties
+breaks <- c(0, 441012, 886405, 1538320, 1721243, 1968954, 2014744)     # to create a vector with desired breakpoints
+labels <- c("0 - 441,012", "441,012 - 866,405", "886,405 - 1,538,320", "1,538,320 - 1,721,243", "1,721,243 - 1,968,954", "1,968,954 - 2,014,744", "> 2,014,744")     # to create a vector for desired breakpoint labels
+ggplot() 
+     + geom_sf(data = beef_map_state, aes(fill = `Value`), color = "black", size = 1) 
+     + scale_fill_stepsn(breaks = breaks, labels = labels,     # to specify the breaks and labels to your vectors
+                         colors = c("aliceblue", "lightblue", "lightgreen", "khaki1", "sandybrown", "chocolate4"),     # to custom the color of each breakpoint 
+                         limits = c(0, 2500000), name = "Inventory (Animal heads)")     # to set the scale limit and legend
+          + geom_sf_text(data = state_centroid, aes(label = abbr),color = "black", size = 10, fontface = "bold") 
+          + coord_sf(crs = st_crs ("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96")) 
+          + theme_void() 
+               
 # Create dataframe of states with positive BSE cases
 bse_state_name <- c("Texas", "Alabama", "California", "Florida", "South Carolina")     # to create a vector with names of states with positive BSE cases
 bse_state <- states_sf %>% dplyr::filter(NAME %in% bse_state_name) %>%     # to filter rows under NAME of states_sf, keeping only rows with values matching bse_state_name
