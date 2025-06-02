@@ -1,0 +1,18 @@
+file_path <- "C:/Users/tmn0031/OneDrive - Auburn University/Bovine spongiform encephalopathy/PrP_normal_1dwy.pdb"     # change "~/PrP_normal_1dwy.pdb" with your actual path
+
+# Load neccesary libraries
+library(tidyverse)     # to manipulate data
+library(r3dmol)     # to create 3D of molecular data
+
+# Create 3D model of prion protein (normal
+r3dmol(viewer_spec = m_viewer_spec(     # to set up initial settings for the viewer
+          cartoonQuality = 10,
+          lowerZoomLimit = 50,		# to specify how far you can zoom in
+          upperZoomLimit = 350))		# t specify how far you can zoom out   
+     %>% m_add_model(data = file_path, format = "pdb")     # to add the data to the model
+     %>% m_set_style(style = m_style_cartoon(color = "lightgreen"))     # to style the overall structure
+     %>% m_set_style(sel = m_sel(ss = "s"), style = m_style_cartoon(color = "lightblue"))     # to style the beta-sheet; 's' for beta-sheet
+     %>% m_set_style(sel = m_sel(ss = "h"), style = m_style_cartoon(color = "orange"))     # to style the alpha helix; 'h' for helix
+     %>% m_set_style(sel = m_sel(resi = 200, style = m_style_cartoon(color = "red"))     # to highlight residue 211 on the PrP protein
+     %>% m_rotate(angle = 90, axis = "y")     # to rotate the model by 90° on y-axis
+     %>% m_spin()     # to continuously spin the model around the y-axis
