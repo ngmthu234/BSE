@@ -73,7 +73,7 @@ bse_state <- states_sf %>% dplyr::filter(NAME %in% bse_state_name) %>%     # to 
      mutate(bse_status = "State with positive BSE case(s)")     # to create a new column bse_status with each row value set to be "State with positive BSE case(s)"
 
 # Plot heatmap of beef distribution across the U.S. with outlines of states with positive BSE cases highlighted -- without counties 
-ggplot() + 
+ggplot()
      + geom_sf(data = beef_map_state, aes(fill = `Value`), color = "black", size = 0.1) 
      + scale_fill_gradient(low = "lightblue", high = "sandybrown", na.value = "gray90", label = comma)
      + geom_sf(data = bse_state, aes(color = bse_status), fill = NA, linewidth = 0.5)     # to add layer bse_state for BSE states
