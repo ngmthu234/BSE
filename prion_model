@@ -10,9 +10,9 @@ r3dmol(viewer_spec = m_viewer_spec(     # to set up initial settings for the vie
           lowerZoomLimit = 50,		# to specify how far you can zoom in
           upperZoomLimit = 350))		# t specify how far you can zoom out   
      %>% m_add_model(data = file_path, format = "pdb")     # to add the data to the model
-     %>% m_set_style(style = m_style_cartoon(color = "lightgreen"))     # to style the overall structure
-     %>% m_set_style(sel = m_sel(ss = "s"), style = m_style_cartoon(color = "lightblue"))     # to style the beta-sheet; 's' for beta-sheet
-     %>% m_set_style(sel = m_sel(ss = "h"), style = m_style_cartoon(color = "orange"))     # to style the alpha helix; 'h' for helix
+     %>% m_set_style(style = m_style_cartoon(color = "#d8d9d4"))     # to style the overall structure
+     %>% m_set_style(sel = m_sel(ss = "s"), style = m_style_cartoon(color = "#d8d9d4"))     # to style the beta-sheet; 's' for beta-sheet
+     %>% m_set_style(sel = m_sel(ss = "h"), style = m_style_cartoon(color = "#d8d9d4"))     # to style the alpha helix; 'h' for helix
      %>% m_set_style(sel = m_sel(resi = 200, style = m_style_cartoon(color = "red"))     # to highlight residue 211 on the PrP protein
      %>% m_rotate(angle = 90, axis = "y")     # to rotate the model by 90° on y-axis
      %>% m_spin()     # to continuously spin the model around the y-axis
