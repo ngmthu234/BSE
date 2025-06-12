@@ -11,8 +11,12 @@ r3dmol(viewer_spec = m_viewer_spec(     # to set up initial settings for the vie
           upperZoomLimit = 350))		# to specify how far you can zoom out  
      %>% m_add_model(data = file_path, format = "pdb")     # to add the data to the model
      %>% m_set_style(style = m_style_cartoon(color = "#d8d9d4"))     # to style the overall structure
+     %>% m_set_style(sel = m_sel(ss = "h"), style = m_style_cartoon(color = "#b2df8a"))     # to style alpha helix
+     %>% m_set_style(sel = m_sel(ss = "s"), style = m_style_cartoon(color = "#33a02c", arrows = TRUE)))     # to style beta sheet
      %>% m_set_style(sel = m_sel(resi = 211), style = m_style_cartoon(color = "red"))     # to highlight residue 211 on the PrP protein
      %>% m_spin()     # to continuously spin the model around the y-axis
+
+"\u03B1" = "#b2df8a", "\u03B2" = "#33a02c"
 
 # Create multiple viewers of prion protein
 view_cartoon <- r3dmol() %>% m_add_model(data = file_path, format = "pdb") %>% m_set_style(style = m_style_cartoon(color = "#d9d9d9")) %>% m_set_style(sel = m_sel(resi = 200), style = m_style_cartoon(color = "red"))     # to create cartoon view
