@@ -1,4 +1,4 @@
-file_path <- "C:/Users/tmn0031/OneDrive - Auburn University/Bovine spongiform encephalopathy/PrP_normal_1dwy.pdb"     # change "~/PrP_normal_1dwy.pdb" with your actual path
+file_path <- "C:/Users/tmn0031/OneDrive - Auburn University/Bovine spongiform encephalopathy/PrP_normal_1dx0.pdb"     # change "~/PrP_normal_1dx0.pdb" with your actual path
 
 # Load neccesary libraries
 library(tidyverse)     # to manipulate data
@@ -14,12 +14,11 @@ r3dmol(viewer_spec = m_viewer_spec(     # to set up initial settings for the vie
      %>% m_set_style(sel = m_sel(ss = "h"), style = m_style_cartoon(color = "#b2df8a"))     # to style alpha helix
      %>% m_set_style(sel = m_sel(ss = "s"), style = m_style_cartoon(color = "#33a02c", arrows = TRUE)))     # to style beta sheet
      %>% m_set_style(sel = m_sel(resi = 211), style = m_style_cartoon(color = "red"))     # to highlight residue 211 on the PrP protein
-     %>% m_spin()     # to continuously spin the model around the y-axis
-
-"\u03B1" = "#b2df8a", "\u03B2" = "#33a02c"
+     %>% m_add_res_labels(sel = m_sel(resi = 211), style = m_style_label(fontSize = 25, backgroundColor = "red", backgroundOpacity = 0.8, inFront = FALSE, alignment = "bottomLeft"))     # to add label to residue 211
+     %>% m_spin(speed = 1.5)     # to continuously spin the model around the y-axis
 
 # Create multiple viewers of prion protein
 view_cartoon <- r3dmol() %>% m_add_model(data = file_path, format = "pdb") %>% m_set_style(style = m_style_cartoon(color = "#d9d9d9")) %>% m_set_style(sel = m_sel(resi = 200), style = m_style_cartoon(color = "red"))     # to create cartoon view
 view_sphere <- r3dmol() %>% m_add_model(data = file_path, format = "pdb") %>%  m_set_style(style = m_style_sphere())     # to create sphere view
-> m_grid(viewer = list(view_sphere, view_cartoon), rows = 1, cols = 2, control_all = TRUE, viewer_config = m_viewer_spec(backgroundColor = "lightblue"))     # to create multiple viewers
+m_grid(viewer = list(view_sphere, view_cartoon), rows = 1, cols = 2, control_all = TRUE, viewer_config = m_viewer_spec(backgroundColor = "lightblue"))     # to create multiple viewers
 
