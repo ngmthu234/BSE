@@ -1,6 +1,7 @@
 # Load necessary libraries
 library(tidvyverse)     # to manipute and graph data
 
+
 # Create vector for PrP sequence
 prp_sequence <-"MVKSHIGSWILVLFVAMWSDVGLCKKRPKPGGGWNTGGSRYPGQGSPGGNRYPPQGGGGWGQPHGGGWGQPHGGGWGQPHGGGWGQPHGGGWGQPHGGGGWGQGGTHGQWNKPSKPKTNMKHVAGAAAAGAVVGGLGGYMLGSAMSRPLIHFGSDYEDRYYRENMHRYPNQVYYRPVDQYSNQNNFVHDCVNITVKEHTVTTTTKGENFTETDIKMMERVVEQMCITQYQRESQAYYQRGASVILFSSPPVILLISFLIFLIVG"
 prp_length <- nchar(prp_sequence)
@@ -39,6 +40,7 @@ ggplot()
 
      # to add residue label for mature PrP 
      + annotate("text", label = c("23", "230"), x = c(23, 230), y - -0.015, color = "#fc9c0a", size = 8, fontfact = "bold")
+     + annotate("text", label = "mature prion protein sequence", x = 126.5, y = -0.03, color = "#fc9c0a", size = 8, fontfact = "bold")
 
      # to add N and C terminals
      + annotate("segment", x = -4, xend = 1, y = 0, color = "black", linewidth = 3) 
@@ -48,6 +50,12 @@ ggplot()
      
      # to customize the axes, theme, and grids
      + scale_x_continuous(name = NULL, breaks = seq(0, prp_length, by = 24), expand = expansion(add = c(5, 5))) 
-     + scale_y_continuous(name = NULL, breaks = NULL, limits = c(-0.03, 0.2), expand = c(0, 0)) 
+     + scale_y_continuous(name = NULL, breaks = NULL, limits = c(-0.04, 0.2), expand = c(0, 0)) 
      + theme_minimal() 
      + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.text.x = element_text(margin = margin(t = 5), size = 15)) 
+
+# Add brackets into domain scheme
+library(pBrackets)     # library to add bracket onto graphs
+grid.brackets(900, 600, 130, 600, lwd = 3, col = "#fc9c0a")
+
+# Save as cairo_pdf with dimensions 29.4" x 16.2"
